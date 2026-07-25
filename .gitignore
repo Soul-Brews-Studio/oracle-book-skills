@@ -1,0 +1,11 @@
+.DS_Store
+.direnv/
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+
+# render scratch — books/booklets keep their own dirs under ψ/writing/
+*.tmp.typ
+body.typ
+full.typ
