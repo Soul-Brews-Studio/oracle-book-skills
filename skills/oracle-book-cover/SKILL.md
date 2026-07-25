@@ -84,6 +84,37 @@ export **1080×1080 (1:1)** + **1080×1350 (4:5)** จากปก สำหร�
 | **series tag** | `#place(top+right)[#box(fill:gold)[เล่ม N]]` |
 | **hero layout (Book-1 style — preferred)** | NO top Didot "Hermes" text. `hermes-wordmark.png` is the hero (`width: 80-82%`); **character `hermes-char.png` enlarged + prominent** (`width: 44-48%`). `#v(1fr)` before the wordmark to center the hero cluster. See [[feedback_book_cover_layout]]. |
 | **PDF filename** | publish/render output as **`NN - Title.pdf`** (`01 - Setting Up Hermes.pdf`, `02 - Making Hermes Actually Work.pdf`, `03 - Inside Hermes.pdf`) — set `render.sh`'s typst output to the prefixed name |
+| **readability scrim (busy bg — ต้องมี)** | พื้นหลังลายแน่น (rain/strata/texture) กินตัวหนังสือเสมอ. วาง rect โปร่งแสงคลุม **เฉพาะคอลัมน์ข้อความ** ลายยังเห็นขอบซ้าย-ขวา: `#place(top+left, dx: 3.5cm, dy: 9.5cm, rect(width: 14cm, height: 13.5cm, fill: rgb("#050705bb"), radius: 8pt))` — alpha `bb` คือจุดที่อ่านออกแต่ยังเห็นลายทะลุ |
+| **generated background (deterministic)** | ลายซับซ้อนให้ script gen เป็น `#place()` แล้ว include เป็น partial. **ต้อง `random.seed(<คงที่>)`** ไม่งั้น re-render ทีไร diff เปลี่ยนทุกรอบ. Matrix rain: หัวคอลัมน์สว่างสุด (`#d8ffe0ff`, 9.5pt) หางไล่จาง (`fade = max(0x28, 0xdd - j*7)`) — ที่ทำให้อ่านเป็น "ฝน" ไม่ใช่ "noise" คือ gradient หัว-หาง ไม่ใช่ตัวอักษร |
+| **complementary title on texture** | พื้นลายเขียว → title สีอำพัน `#ffb454` ไม่ใช่เขียวเข้มกว่า. บนพื้นแน่น **คนละ hue ชนะการเพิ่มขนาด** — ขยาย font บนลายสีเดียวกันยังจม |
+
+## ⚠️ typst text gotchas บนปก (เจอจริงตอนทำปก terminal — noah, 2026-07-25)
+
+typst ตีความอักขระบางตัวเป็น syntax **ในเนื้อความ** ไม่ใช่แค่ในโค้ด ปก terminal/CLI โดนเต็มๆ:
+
+| อักขระ | typst เข้าใจว่า | เขียนยังไง |
+|---|---|---|
+| `$` | เปิด **math mode** → พังทั้ง block หรือจัดหน้าเพี้ยน | escape เป็น `\$` — prompt `$ git log …` ต้องเป็น `\$ git log …` |
+| `#` | เปิด **code expression** → กินคำถัดไปเป็นตัวแปร | ใช้ `#sym.hash` (comment `##` = `#sym.hash#sym.hash`) |
+
+> ทั้งคู่เจอเพราะ **render เดี่ยวแล้วเปิดดูจริง** — typst ไม่ได้ error เสมอ บางทีแค่จัดหน้าเพี้ยนเงียบๆ
+
+**Overlap check**: element ตกแต่งที่วางด้วย loop (strata bands, rain, grid) ไม่รู้ว่า title อยู่ตรงไหน —
+วางทับได้สบาย ตรวจทุกครั้งว่า band ไหนพาดผ่านกล่องข้อความ แล้วขยับ/ใส่ scrim
+
+## 🔁 คาดหวังหลายรอบ อย่าคิดว่ารอบเดียวจบ
+
+ปกที่ผ่านจริงใช้ **4 iteration** (proof ด้านล่าง) — และ **ชื่อเล่มเปลี่ยนกลางทางได้**:
+
+```
+721688f  clean-editorial cover          ← เลือกจาก 3 candidates แล้ว bake
+126286c  retitle + เปลี่ยนเป็น terminal   ← ชื่อเล่มเปลี่ยน ปกเปลี่ยนตาม
+7bc8c83  contrast pass (amber vs green) ← title จมในลาย แก้ด้วยคนละ hue
+319aca5  full Matrix digital-rain       ← direction จาก human: "เป็นลาย ๆ"
+```
+
+> **อย่า hardcode ชื่อไฟล์ PDF จาก title** — retitle กลางทางแล้วต้องตามแก้ทุกที่
+> (`render.sh`, Makefile, README, release asset) ใช้ตัวแปรตัวเดียว
 
 ## กฎเหล็ก
 1. **ปกอย่างเดียว** — ห้ามแตะบท/เนื้อหา/หน้านับ (verify page count เท่าเดิม)
@@ -92,6 +123,20 @@ export **1080×1080 (1:1)** + **1080×1350 (4:5)** จากปก สำหร�
 4. **deterministic** — typst/magick ทำ ไม่ต้อง agent
 5. **human gates outward** — commit/push/โพสต์ = ขออนุมัติ
 6. **Rule 6** — sign ปกว่าเป็น AI
+
+## ✅ Proven on — *รหัสลับที่รู้กันเองกับ AI* (noah-oracle, 2026-07-25)
+
+verified ด้วยตาเอง ไม่ใช่คำบอกเล่า — `laris-co/noah-oracle`,
+`ψ/writing/books/2026-07-24_claude-md-archaeology/`:
+
+- **5 candidates render เป็น PNG เดี่ยว** แล้วให้ human เลือกจากภาพจริง:
+  `cover-{a-strata,b-terminal,b2-terminal-v2,c-clean,d-matrix}.{typ,png}`
+- **4 รอบกว่าจะลงตัว** — commits `721688f → 126286c → 7bc8c83 → 319aca5`
+- **`gen-matrix-rain.py`** → `matrix-rain.typ.partial` (297KB, 2,850 `#place()`, seed 42)
+- **กฎ "ปกไม่แตะเนื้อหา" ใช้ได้จริง** — `pdfinfo` = **92 หน้า เท่าเดิมทุกรอบ** หลัง bake ปก
+- ผลลัพธ์: `รหัสลับที่รู้กันเองกับ-AI.pdf` — 92 หน้า A4 1.4MB 13 บท
+
+> อ่านได้ **read-only** — TEACH-DONT-EDIT ห้ามแก้เรปคนอื่น
 
 ## Reusable assets (ในเรป — [[feedback_keep_code_in_repo]])
 - `ψ/lab/2026-06-13_cover-and-session-mining/cover-experiments/cover-AB.typ` — ปก black-gold ตัวเต็ม
