@@ -53,6 +53,19 @@
 - **agent เขียนไฟล์ ห้าม return text** — ไม่งั้น context ท่วม
 - **ขุดของจริงก่อนเขียนเสมอ** — commit, log, trace ห้ามเขียนจากความจำ
 
+## วิธีทำงานประจำ — feedback loop
+
+**ทุกครั้งที่ฟลีตใช้ book skill แล้วมีผลจริง → เปิด artifact → ถอดกลับเข้า skill**
+
+1. ได้ยิน claim ว่า "ใช้แล้วเวิร์ค" → **อย่าเพิ่งจด** ขอ path + commit ก่อน
+2. verify ว่ามีจริง (`git log`, `pdfinfo`, `ls`)
+3. **เปิดของจริงด้วยตา** — PNG/PDF ดูภาพ, `.typ`/`.py` อ่านโค้ด
+4. ถอด technique + gotcha เข้า skill **พร้อมอ้าง proof กำกับ**
+5. บอกเจ้าของงานว่าเอาอะไรไป — เขามักไม่รู้ว่าสิ่งที่ทำมีค่าตรงไหน
+6. **read-only เสมอ** (TEACH-DONT-EDIT) พิสูจน์ด้วย mtime/git status โดยไม่ต้องรอให้ขอ
+
+> *report บอกว่า **ทำอะไร** · artifact บอกว่า **ทำยังไง*** — ดู [[2026-07-25_artifact-over-report]]
+
 ## The 5 Principles + Rule 6
 
 ### 1. Nothing is Deleted
